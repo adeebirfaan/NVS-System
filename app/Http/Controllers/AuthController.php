@@ -84,7 +84,7 @@ class AuthController extends Controller
 
         $user->sendEmailVerificationNotification();
 
-        return redirect()->route('home')->with('success', 'Registration successful! Please verify your email.');
+        return redirect()->route('login')->with('success', 'Registration successful! Please verify your email.');
     }
 
     public function verifyEmail(Request $request, $id, $hash)
@@ -188,7 +188,7 @@ class AuthController extends Controller
             'must_change_password' => false,
         ]);
 
-        return redirect()->route('home')->with('success', 'Password changed successfully!');
+        return redirect()->route('dashboard')->with('success', 'Password changed successfully!');
     }
 
     protected function redirectTo($user): string

@@ -3,14 +3,15 @@
 use App\Http\Controllers\AgencyController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\McmcInquiryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicInquiryController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+    return redirect('/login');
+});
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -57,6 +58,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::prefix('mcmc')->middleware(['auth', 'mcmc'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'mcmcDashboard'])->name('mcmc.dashboard');
+    
+    Route::prefix('inquiries')->group(function () {
+        Route::get('/', [McmcInquiryController::class, 'index'])->name('mcmc.inquiries.index');
+        Route::get('/{inquiry}', [McmcInquiryController::class, 'show'])->name('mcmc.inquiries.show');
+        Route::patch('/{inquiry}/status', [McmcInquiryController::class, 'updateStatus'])->name('mcmc.inquiries.update-status');
+        Route::post('/{inquiry}/assign', [McmcInquiryController::class, 'assign'])->name('mcmc.inquiries.assign');
+        Route::get('/statistics', [McmcInquiryController::class, 'statistics'])->name('mcmc.inquiries.statistics');
+    });
+    
     Route::resource('/users', UserController::class);
     Route::resource('/agencies', AgencyController::class);
     Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('mcmc.users.reset-password');

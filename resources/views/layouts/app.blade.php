@@ -20,7 +20,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="{{ route('home') }}">
+            <a class="navbar-brand" href="{{  url('/') }}">
                 <i class="bi bi-shield-check"></i> NVS-System
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
