@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgencyController;
+use App\Http\Controllers\AgencyInquiryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\McmcInquiryController;
@@ -64,6 +65,7 @@ Route::prefix('mcmc')->middleware(['auth', 'mcmc'])->group(function () {
         Route::get('/{inquiry}', [McmcInquiryController::class, 'show'])->name('mcmc.inquiries.show');
         Route::patch('/{inquiry}/status', [McmcInquiryController::class, 'updateStatus'])->name('mcmc.inquiries.update-status');
         Route::post('/{inquiry}/assign', [McmcInquiryController::class, 'assign'])->name('mcmc.inquiries.assign');
+        Route::post('/{inquiry}/reassign', [McmcInquiryController::class, 'reassign'])->name('mcmc.inquiries.reassign');
         Route::get('/statistics', [McmcInquiryController::class, 'statistics'])->name('mcmc.inquiries.statistics');
     });
     
@@ -76,6 +78,15 @@ Route::prefix('mcmc')->middleware(['auth', 'mcmc'])->group(function () {
 
 Route::prefix('agency')->middleware(['auth', 'agency'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'agencyDashboard'])->name('agency.dashboard');
+    
+    Route::prefix('inquiries')->group(function () {
+        Route::get('/', [AgencyInquiryController::class, 'index'])->name('agency.inquiries.index');
+        Route::get('/{inquiry}', [AgencyInquiryController::class, 'show'])->name('agency.inquiries.show');
+        Route::post('/{inquiry}/accept', [AgencyInquiryController::class, 'accept'])->name('agency.inquiries.accept');
+        Route::post('/{inquiry}/reject', [AgencyInquiryController::class, 'reject'])->name('agency.inquiries.reject');
+        Route::patch('/{inquiry}/progress', [AgencyInquiryController::class, 'updateProgress'])->name('agency.inquiries.update-progress');
+    });
+    
     Route::get('/profile', [ProfileController::class, 'show'])->name('agency.profile');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('agency.profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('agency.profile.update');

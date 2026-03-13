@@ -5,8 +5,8 @@
 @section('content')
 <div class="container mt-5">
     <div class="mb-3">
-        <a href="{{ route('mcmc.inquiries.index') }}" class="btn btn-secondary btn-sm">
-            <i class="bi bi-arrow-left"></i> Back to Inquiries
+        <a href="{{ route('agency.inquiries.index') }}" class="btn btn-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Assigned Inquiries
         </a>
     </div>
 
@@ -80,18 +80,16 @@
                             <thead>
                                 <tr>
                                     <th>Date</th>
-                                    <th>From</th>
-                                    <th>To</th>
+                                    <th>Status</th>
                                     <th>Notes</th>
-                                    <th>Officer</th>
+                                    <th>By</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($inquiry->statusHistories as $history)
                                     <tr>
                                         <td>{{ $history->created_at->format('d/m/Y H:i') }}</td>
-                                        <td>{{ $history->from_status ? ucfirst(str_replace('_', ' ', $history->from_status)) : '-' }}</td>
-                                        <td>{{ ucfirst(str_replace('_', ' ', $history->to_status)) }}</td>
+                                        <td>{{ $history->getStatusLabelAttribute() }}</td>
                                         <td>{{ $history->notes ?? '-' }}</td>
                                         <td>{{ $history->officer_name ?? 'System' }}</td>
                                     </tr>
@@ -124,22 +122,27 @@
                             <td>{{ $inquiry->created_at->format('d/m/Y H:i') }}</td>
                         </tr>
                         <tr>
-                            <th>IP Address</th>
-                            <td>{{ $inquiry->submission_ip ?? '-' }}</td>
-                        </tr>
-                        <tr>
                             <th>Category</th>
                             <td>{{ ucfirst(str_replace('_', ' ', $inquiry->category)) }}</td>
                         </tr>
-                        @if($inquiry->currentAssignment)
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Assignment Details</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
                         <tr>
-                            <th>Assigned Agency</th>
-                            <td>{{ $inquiry->currentAssignment->agency->name }}</td>
+                            <th>Agency</th>
+                            <td>{{ auth()->user()->agency->name }}</td>
                         </tr>
                         <tr>
-                            <th>Assignment Status</th>
+                            <th>Status</th>
                             <td>
-                                @switch($inquiry->currentAssignment->status)
+                                @switch($assignment->status)
                                     @case('pending')
                                         <span class="badge bg-warning">Pending</span>
                                         @break
@@ -149,84 +152,58 @@
                                     @case('rejected')
                                         <span class="badge bg-danger">Rejected</span>
                                         @break
+                                    @case('reassigned')
+                                        <span class="badge bg-info">Reassigned</span>
+                                        @break
                                 @endswitch
                             </td>
                         </tr>
+                        @if($assignment->assignment_notes)
+                        <tr>
+                            <th>Notes from MCMC</th>
+                            <td>{{ $assignment->assignment_notes }}</td>
+                        </tr>
+                        @endif
+                        @if($assignment->rejection_reason)
+                        <tr>
+                            <th>Rejection Reason</th>
+                            <td class="text-danger">{{ $assignment->rejection_reason }}</td>
+                        </tr>
                         @endif
                     </table>
+
+                    @if($assignment->status === 'pending')
+                        <div class="d-grid gap-2">
+                            <form method="POST" action="{{ route('agency.inquiries.accept', $inquiry) }}">
+                                @csrf
+                                <div class="mb-2">
+                                    <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="Optional notes"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-check-circle"></i> Accept Assignment
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                <i class="bi bi-x-circle"></i> Reject Assignment
+                            </button>
+                        </div>
+                    @endif
                 </div>
             </div>
 
-            @if($inquiry->status === 'pending_review')
-            <div class="card mb-4">
+            @if($assignment->status === 'accepted' && $inquiry->status === 'under_investigation')
+            <div class="card">
                 <div class="card-header">
-                    <h6 class="mb-0">Assign to Agency</h6>
+                    <h6 class="mb-0">Update Investigation Progress</h6>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('mcmc.inquiries.assign', $inquiry) }}">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="agency_id" class="form-label">Select Agency</label>
-                            <select class="form-select" id="agency_id" name="agency_id" required>
-                                <option value="">Select Agency</option>
-                                @foreach(\App\Models\Agency::active()->get() as $agency)
-                                    <option value="{{ $agency->id }}">{{ $agency->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea class="form-control" id="notes" name="notes" rows="2" placeholder="Optional notes for the agency"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Assign Inquiry</button>
-                    </form>
-                </div>
-            </div>
-            @endif
-
-            @if($inquiry->currentAssignment && $inquiry->currentAssignment->status === 'rejected')
-            <div class="card mb-4 border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h6 class="mb-0">Assignment Rejected - Reassign</h6>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-danger mb-3">
-                        <strong>Rejection Reason:</strong> {{ $inquiry->currentAssignment->rejection_reason }}
-                    </div>
-                    <form method="POST" action="{{ route('mcmc.inquiries.reassign', $inquiry) }}">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="agency_id" class="form-label">Select New Agency</label>
-                            <select class="form-select" id="agency_id" name="agency_id" required>
-                                <option value="">Select Agency</option>
-                                @foreach(\App\Models\Agency::active()->get() as $agency)
-                                    <option value="{{ $agency->id }}">{{ $agency->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea class="form-control" id="notes" name="notes" rows="2" placeholder="Optional notes for the new agency"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-warning w-100">Reassign Inquiry</button>
-                    </form>
-                </div>
-            </div>
-            @endif
-
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h6 class="mb-0">Update Status</h6>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('mcmc.inquiries.update-status', $inquiry) }}">
+                    <form method="POST" action="{{ route('agency.inquiries.update-progress', $inquiry) }}">
                         @csrf
                         @method('PATCH')
                         <div class="mb-3">
-                            <label for="status" class="form-label">New Status</label>
+                            <label for="status" class="form-label">Update Status</label>
                             <select class="form-select" id="status" name="status" required>
                                 <option value="">Select Status</option>
-                                <option value="pending_review" {{ $inquiry->status == 'pending_review' ? 'selected' : '' }}>Pending Review</option>
                                 <option value="under_investigation" {{ $inquiry->status == 'under_investigation' ? 'selected' : '' }}>Under Investigation</option>
                                 <option value="verified_true">Verified as True</option>
                                 <option value="identified_fake">Identified as Fake</option>
@@ -234,14 +211,43 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="notes" class="form-label">Internal Notes</label>
-                            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Add notes about this status change (visible to user)"></textarea>
+                            <label for="notes" class="form-label">Notes / Findings <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="notes" name="notes" rows="4" required placeholder="Provide details about your investigation findings"></textarea>
                         </div>
-                        <button type="submit" class="btn btn-warning w-100">Update Status</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Update Status
+                        </button>
                     </form>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 </div>
+
+@if($assignment->status === 'pending')
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectModalLabel">Reject Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('agency.inquiries.reject', $inquiry) }}">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="rejection_reason" class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="rejection_reason" name="rejection_reason" rows="3" required placeholder="Please provide a reason why this inquiry cannot be handled by your agency"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Reject Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
 @endsection

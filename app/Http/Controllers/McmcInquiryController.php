@@ -166,6 +166,56 @@ class McmcInquiryController extends Controller
         return redirect()->route('mcmc.inquiries.show', $inquiry)->with('success', 'Inquiry assigned to ' . $agency->name);
     }
 
+    public function reassign(Request $request, Inquiry $inquiry)
+    {
+        $validated = $request->validate([
+            'agency_id' => 'required|exists:agencies,id',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $agency = Agency::findOrFail($validated['agency_id']);
+
+        $previousAssignment = $inquiry->currentAssignment;
+        
+        if ($previousAssignment) {
+            $previousAssignment->update([
+                'status' => \App\Models\AgencyAssignment::STATUS_REASSIGNED,
+            ]);
+        }
+
+        $assignment = \App\Models\AgencyAssignment::create([
+            'inquiry_id' => $inquiry->id,
+            'agency_id' => $validated['agency_id'],
+            'assigned_by' => auth()->id(),
+            'assignment_notes' => $validated['notes'],
+            'assignment_group_id' => $previousAssignment?->id,
+            'status' => \App\Models\AgencyAssignment::STATUS_PENDING,
+        ]);
+
+        $inquiry->update([
+            'status' => Inquiry::STATUS_UNDER_INVESTIGATION,
+        ]);
+
+        InquiryStatusHistory::create([
+            'inquiry_id' => $inquiry->id,
+            'from_status' => $inquiry->getOriginal('status'),
+            'to_status' => Inquiry::STATUS_UNDER_INVESTIGATION,
+            'notes' => 'Reassigned to ' . $agency->name . '. ' . ($validated['notes'] ?? ''),
+            'officer_name' => auth()->user()->name,
+            'officer_id' => auth()->id(),
+        ]);
+
+        Notification::notifyAgency(
+            $validated['agency_id'],
+            Notification::TYPE_INQUIRY_ASSIGNED,
+            'Inquiry Reassigned',
+            "Inquiry #{$inquiry->inquiry_number} has been reassigned to your agency for investigation.",
+            ['inquiry_id' => $inquiry->id, 'inquiry_number' => $inquiry->inquiry_number]
+        );
+
+        return redirect()->route('mcmc.inquiries.show', $inquiry)->with('success', 'Inquiry reassigned to ' . $agency->name);
+    }
+
     public function statistics()
     {
         $stats = [
