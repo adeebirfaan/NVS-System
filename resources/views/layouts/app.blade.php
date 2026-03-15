@@ -130,7 +130,15 @@
                                 <i class="bi bi-person-circle"></i> {{ auth()->user()->name }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a></li>
+                                    <li>
+                                    @if(auth()->user()->role === 'mcmc')
+                                        <a class="dropdown-item" href="{{ route('mcmc.dashboard') }}">Dashboard</a>
+                                    @elseif(auth()->user()->role === 'agency')
+                                        <a class="dropdown-item" href="{{ route('agency.dashboard') }}">Dashboard</a>
+                                    @else
+                                        <a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a>
+                                    @endif
+                                </li>
                                 <li><a class="dropdown-item" href="{{ route('profile.show') }}">My Profile</a></li>
                                 <li><a class="dropdown-item" href="{{ route('profile.password') }}">Change Password</a></li>
                                 <li><hr class="dropdown-divider"></li>

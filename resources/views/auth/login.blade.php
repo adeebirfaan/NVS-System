@@ -48,23 +48,23 @@
     }
 
     .form-control{
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,255,255,0.2);
-        color: white;
-        border-radius: 12px;
-        padding: 12px 14px;
-        transition: 0.3s;
+        background: rgba(255,255,255,0.15);
+        border:1px solid rgba(255,255,255,0.25);
+        color:#1f2937;   /* dark text */
+        border-radius:10px;
+        padding:12px;
+        transition:0.3s;
+    }
+
+    .form-control:focus{
+        background: rgba(255,255,255,0.25);
+        border:1px solid #4facfe;
+        box-shadow:0 0 10px #4facfe;
+        color:#111827;   /* dark when typing */
     }
 
     .form-control::placeholder{
         color: rgba(255,255,255,0.6);
-    }
-
-    .form-control:focus{
-        background: rgba(255,255,255,0.1);
-        border: 1px solid #4facfe;
-        box-shadow: 0 0 12px rgba(79,172,254,0.6);
-        color: white;
     }
 
     .form-control.is-invalid{
