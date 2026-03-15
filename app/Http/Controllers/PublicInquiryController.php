@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreInquiryRequest;
 use App\Models\Inquiry;
-use App\Models\InquiryEvidence;
+use App\Models\InquiryEvidences;
 use App\Models\InquiryStatusHistory;
 use App\Models\Notification;
 use Illuminate\Http\Request;
@@ -56,7 +56,7 @@ class PublicInquiryController extends Controller
             foreach ($request->file('evidences') as $file) {
                 $path = $file->store('evidences/' . $inquiry->id, 'public');
                 
-                InquiryEvidence::create([
+                InquiryEvidences::create([
                     'inquiry_id' => $inquiry->id,
                     'file_path' => $path,
                     'original_filename' => $file->getClientOriginalName(),

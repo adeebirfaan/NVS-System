@@ -51,7 +51,7 @@ class AuthController extends Controller
             return redirect()->route('password.change');
         }
 
-        return redirect()->intended($this->redirectTo($user));
+       return redirect($this->redirectTo($user));
     }
 
     public function showRegistrationForm()
@@ -109,21 +109,39 @@ class AuthController extends Controller
         return view('auth.forgot-password');
     }
 
-    public function sendResetLink(Request $request)
+   public function sendResetLink(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $request->validate([
+            'email' => 'required|email',
+        ]);
 
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return back()->withErrors(['email' => 'We cannot find a user with that email address.']);
+            return back()->withErrors([
+                'email' => 'We cannot find a user with that email address.'
+            ])->withInput();
         }
 
-        $status = Password::sendResetLink($request->only('email'));
+        $token = Password::broker()->createToken($user);
 
-        return $status === Password::RESET_LINK_SENT
-            ? back()->with('success', 'We have emailed your password reset link!')
-            : back()->withErrors(['email' => __($status)]);
+        return redirect()->route('password.link.sent', [
+            'email' => $user->email,
+            'token' => $token,
+        ]);
+    }
+
+    public function showResetLinkSent(Request $request)
+    {
+        if (!$request->filled('email') || !$request->filled('token')) {
+            return redirect()->route('password.request')
+                ->withErrors(['email' => 'Invalid password reset request.']);
+        }
+
+        return view('auth.reset-link-sent', [
+            'email' => $request->email,
+            'token' => $request->token,
+        ]);
     }
 
     public function showResetPasswordForm(Request $request, $token)
@@ -148,11 +166,14 @@ class AuthController extends Controller
             }
         );
 
-        return $status === Password::PASSWORD_RESET
-            ? redirect('/login')->with('success', 'Password has been reset!')
-            : back()->withErrors(['email' => __($status)]);
-    }
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('success', 'Password has been reset successfully. Please log in with your new password.');
+        }
 
+        return back()->withErrors([
+            'email' => __($status),
+        ])->withInput();
+    }
     public function logout(Request $request)
     {
         Auth::logout();
@@ -188,7 +209,8 @@ class AuthController extends Controller
             'must_change_password' => false,
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Password changed successfully!');
+       return redirect($this->redirectTo($user))
+        ->with('success', 'Password changed successfully!');
     }
 
     protected function redirectTo($user): string
