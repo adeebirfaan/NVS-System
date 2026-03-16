@@ -35,11 +35,14 @@
         padding: 22px;
     }
 
+    /* =========================
+       FILTER INPUTS
+       ========================= */
     .form-control,
     .form-select{
-        background: rgba(255,255,255,0.15);
-        border: 1px solid rgba(255,255,255,0.25);
-        color: #111827;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.22);
+        color: #ffffff !important;
         border-radius: 12px;
         padding: 12px 14px;
         transition: 0.3s;
@@ -47,16 +50,39 @@
 
     .form-control:focus,
     .form-select:focus{
-        background: rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.18);
         border: 1px solid #4facfe;
         box-shadow: 0 0 12px rgba(79,172,254,0.6);
-        color: #111827;
+        color: #ffffff !important;
     }
 
     .form-control::placeholder{
-        color: rgba(17,24,39,0.45);
+        color: rgba(255,255,255,0.58) !important;
     }
 
+    .form-select{
+        color: #ffffff !important;
+    }
+
+    .form-select option{
+        color: #111827;
+        background: #ffffff;
+    }
+
+    /* Make date input text white */
+    input[type="date"]{
+        color: #ffffff !important;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator{
+        filter: invert(1);
+        opacity: 0.9;
+        cursor: pointer;
+    }
+
+    /* =========================
+       BUTTONS
+       ========================= */
     .btn-modern{
         border-radius: 10px;
         padding: 10px 18px;
@@ -100,41 +126,124 @@
         color: white;
     }
 
-    .table{
+    .action-btn{
+        background: linear-gradient(135deg,#4facfe,#00f2fe);
+        border: none;
         color: white;
-        margin-bottom: 0;
+        border-radius: 10px;
+        padding: 6px 10px;
     }
 
-    .table thead th{
-        border-bottom: 1px solid rgba(255,255,255,0.15);
-        color: rgba(255,255,255,0.85);
+    .action-btn:hover{
+        color: white;
+        box-shadow: 0 6px 14px rgba(0,242,254,0.25);
+    }
+
+    /* =========================
+       GLASS TABLE FIX
+       ========================= */
+    .table-wrapper{
+        position: relative;
+        border-radius: 18px;
+        overflow: hidden;
+        background: rgba(10,15,30,0.42);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,0.10);
+        box-shadow:
+            0 8px 30px rgba(0,0,0,0.45),
+            inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .table-wrapper::before{
+        content: "";
+        position: absolute;
+        inset: 0;
+        padding: 1px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(79,172,254,0.50), rgba(0,242,254,0.18));
+        -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+    }
+
+    .table-responsive{
+        border-radius: 18px;
+        overflow: hidden;
+        background: transparent !important;
+    }
+
+    .table.glass-table{
+        --bs-table-color: #f8fafc;
+        --bs-table-bg: transparent;
+        --bs-table-border-color: rgba(255,255,255,0.08);
+        --bs-table-striped-color: #f8fafc;
+        --bs-table-striped-bg: rgba(255,255,255,0.03);
+        --bs-table-active-color: #ffffff;
+        --bs-table-active-bg: rgba(255,255,255,0.06);
+        --bs-table-hover-color: #ffffff;
+        --bs-table-hover-bg: rgba(79,172,254,0.10);
+
+        color: #f8fafc !important;
+        margin-bottom: 0;
+        background-color: transparent !important;
+        border-color: rgba(255,255,255,0.08) !important;
+    }
+
+    .table.glass-table > :not(caption) > * > *{
+        background-color: transparent !important;
+        box-shadow: none !important;
+        color: #f8fafc !important;
+        border-bottom-color: rgba(255,255,255,0.08) !important;
+        vertical-align: middle;
+        padding: 16px 18px;
+    }
+
+    .table.glass-table thead{
+        background: rgba(255,255,255,0.06) !important;
+    }
+
+    .table.glass-table thead th{
+        border-bottom: 1px solid rgba(255,255,255,0.12) !important;
+        color: rgba(255,255,255,0.92) !important;
         font-weight: 600;
         white-space: nowrap;
+        letter-spacing: 0.2px;
     }
 
-    .table tbody td{
-        border-color: rgba(255,255,255,0.08);
-        vertical-align: middle;
+    .table.glass-table tbody tr{
+        transition: background 0.2s ease;
     }
 
-    .table-hover tbody tr:hover{
-        background: rgba(255,255,255,0.05);
+    .table.glass-table tbody tr:nth-child(even){
+        background: rgba(255,255,255,0.03);
     }
 
-    .table a{
+    .table.glass-table.table-hover tbody tr:hover{
+        background: rgba(79,172,254,0.10) !important;
+    }
+
+    .table.glass-table a{
         color: #8fd3ff;
         text-decoration: none;
+        font-weight: 500;
     }
 
-    .table a:hover{
+    .table.glass-table a:hover{
         color: white;
         text-decoration: underline;
     }
 
     .muted-text{
-        color: rgba(255,255,255,0.65) !important;
+        color: rgba(255,255,255,0.68) !important;
     }
 
+    /* =========================
+       BADGES
+       ========================= */
     .glass-badge{
         display: inline-block;
         padding: 7px 12px;
@@ -186,19 +295,9 @@
         border-color: rgba(148,163,184,0.30);
     }
 
-    .action-btn{
-        background: linear-gradient(135deg,#4facfe,#00f2fe);
-        border: none;
-        color: white;
-        border-radius: 10px;
-        padding: 6px 10px;
-    }
-
-    .action-btn:hover{
-        color: white;
-        box-shadow: 0 6px 14px rgba(0,242,254,0.25);
-    }
-
+    /* =========================
+       PAGINATION
+       ========================= */
     .pagination{
         justify-content: center;
         margin-top: 20px;
@@ -302,95 +401,97 @@
 
     <div class="card glass-card">
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>Inquiry #</th>
-                            <th>Title</th>
-                            <th>Submitter</th>
-                            <th>Category</th>
-                            <th>Agency</th>
-                            <th>Status</th>
-                            <th>Submitted</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @forelse($inquiries as $inquiry)
+            <div class="table-wrapper">
+                <div class="table-responsive">
+                    <table class="table glass-table table-hover align-middle">
+                        <thead>
                             <tr>
-                                <td>
-                                    <span class="muted-text">{{ $inquiry->inquiry_number }}</span>
-                                </td>
+                                <th>Inquiry #</th>
+                                <th>Title</th>
+                                <th>Submitter</th>
+                                <th>Category</th>
+                                <th>Agency</th>
+                                <th>Status</th>
+                                <th>Submitted</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
 
-                                <td>
-                                    <a href="{{ route('mcmc.inquiries.show', $inquiry) }}">
-                                        {{ Str::limit($inquiry->title, 30) }}
-                                    </a>
-                                </td>
+                        <tbody>
+                            @forelse($inquiries as $inquiry)
+                                <tr>
+                                    <td>
+                                        <span class="muted-text">{{ $inquiry->inquiry_number }}</span>
+                                    </td>
 
-                                <td>
-                                    {{ $inquiry->user->name }}
-                                    <br>
-                                    <small class="muted-text">{{ $inquiry->user->email }}</small>
-                                </td>
+                                    <td>
+                                        <a href="{{ route('mcmc.inquiries.show', $inquiry) }}">
+                                            {{ Str::limit($inquiry->title, 30) }}
+                                        </a>
+                                    </td>
 
-                                <td>
-                                    <span class="glass-badge badge-category">
-                                        {{ ucfirst(str_replace('_', ' ', $inquiry->category)) }}
-                                    </span>
-                                </td>
+                                    <td>
+                                        {{ $inquiry->user->name }}
+                                        <br>
+                                        <small class="muted-text">{{ $inquiry->user->email }}</small>
+                                    </td>
 
-                                <td>
-                                    @if($inquiry->currentAssignment)
-                                        <span class="glass-badge badge-agency">
-                                            {{ $inquiry->currentAssignment->agency->name }}
+                                    <td>
+                                        <span class="glass-badge badge-category">
+                                            {{ ucfirst(str_replace('_', ' ', $inquiry->category)) }}
                                         </span>
-                                    @else
-                                        <span class="muted-text">-</span>
-                                    @endif
-                                </td>
+                                    </td>
 
-                                <td>
-                                    @switch($inquiry->status)
-                                        @case('pending_review')
-                                            <span class="glass-badge badge-pending">Pending</span>
-                                            @break
+                                    <td>
+                                        @if($inquiry->currentAssignment)
+                                            <span class="glass-badge badge-agency">
+                                                {{ $inquiry->currentAssignment->agency->name }}
+                                            </span>
+                                        @else
+                                            <span class="muted-text">-</span>
+                                        @endif
+                                    </td>
 
-                                        @case('under_investigation')
-                                            <span class="glass-badge badge-investigating">Investigating</span>
-                                            @break
+                                    <td>
+                                        @switch($inquiry->status)
+                                            @case('pending_review')
+                                                <span class="glass-badge badge-pending">Pending</span>
+                                                @break
 
-                                        @case('verified_true')
-                                            <span class="glass-badge badge-verified">Verified True</span>
-                                            @break
+                                            @case('under_investigation')
+                                                <span class="glass-badge badge-investigating">Investigating</span>
+                                                @break
 
-                                        @case('identified_fake')
-                                            <span class="glass-badge badge-fake">Identified Fake</span>
-                                            @break
+                                            @case('verified_true')
+                                                <span class="glass-badge badge-verified">Verified True</span>
+                                                @break
 
-                                        @case('rejected')
-                                            <span class="glass-badge badge-rejected">Rejected</span>
-                                            @break
-                                    @endswitch
-                                </td>
+                                            @case('identified_fake')
+                                                <span class="glass-badge badge-fake">Identified Fake</span>
+                                                @break
 
-                                <td>{{ $inquiry->created_at->format('d/m/Y') }}</td>
+                                            @case('rejected')
+                                                <span class="glass-badge badge-rejected">Rejected</span>
+                                                @break
+                                        @endswitch
+                                    </td>
 
-                                <td>
-                                    <a href="{{ route('mcmc.inquiries.show', $inquiry) }}" class="btn btn-sm action-btn">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="text-center empty-text">No inquiries found.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                    <td>{{ $inquiry->created_at->format('d/m/Y') }}</td>
+
+                                    <td>
+                                        <a href="{{ route('mcmc.inquiries.show', $inquiry) }}" class="btn btn-sm action-btn">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="text-center empty-text">No inquiries found.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {{ $inquiries->links() }}

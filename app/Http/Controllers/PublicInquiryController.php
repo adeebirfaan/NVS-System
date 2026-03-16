@@ -8,17 +8,22 @@ use App\Models\InquiryEvidences;
 use App\Models\InquiryStatusHistory;
 use App\Models\Notification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class PublicInquiryController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
+
         $this->middleware(function ($request, $next) {
-            if (!auth()->user()->isPublic()) {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+
+            if (!$user || !$user->isPublic()) {
                 return redirect('/')->with('error', 'Access denied.');
             }
+
             return $next($request);
         })->only(['create', 'store', 'myInquiries', 'show']);
     }
@@ -31,7 +36,7 @@ class PublicInquiryController extends Controller
     public function store(StoreInquiryRequest $request)
     {
         $inquiry = Inquiry::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'inquiry_number' => Inquiry::generateInquiryNumber(),
             'title' => $request->title,
             'description' => $request->description,
@@ -48,14 +53,14 @@ class PublicInquiryController extends Controller
             'from_status' => null,
             'to_status' => $inquiry->status,
             'notes' => 'Inquiry submitted by user.',
-            'officer_name' => auth()->user()->name,
-            'officer_id' => auth()->id(),
+            'officer_name' => Auth::user()->name,
+            'officer_id' => Auth::id(),
         ]);
 
         if ($request->hasFile('evidences')) {
             foreach ($request->file('evidences') as $file) {
                 $path = $file->store('evidences/' . $inquiry->id, 'public');
-                
+
                 InquiryEvidences::create([
                     'inquiry_id' => $inquiry->id,
                     'file_path' => $path,
@@ -70,15 +75,20 @@ class PublicInquiryController extends Controller
             Notification::TYPE_INQUIRY_SUBMITTED,
             'New Inquiry Submitted',
             "Inquiry #{$inquiry->inquiry_number} has been submitted by {$inquiry->user->name}.",
-            ['inquiry_id' => $inquiry->id, 'inquiry_number' => $inquiry->inquiry_number]
+            [
+                'inquiry_id' => $inquiry->id,
+                'inquiry_number' => $inquiry->inquiry_number,
+            ]
         );
 
-        return redirect()->route('inquiries.my')->with('success', 'Your inquiry has been submitted successfully! Inquiry Number: ' . $inquiry->inquiry_number);
+        return redirect()
+            ->route('inquiries.my')
+            ->with('success', 'Your inquiry has been submitted successfully! Inquiry Number: ' . $inquiry->inquiry_number);
     }
 
     public function myInquiries(Request $request)
     {
-        $query = Inquiry::where('user_id', auth()->id())
+        $query = Inquiry::where('user_id', Auth::id())
             ->with('latestStatusHistory');
 
         if ($request->has('status') && $request->status !== '') {
@@ -101,9 +111,12 @@ class PublicInquiryController extends Controller
     {
         $this->authorize('view', $inquiry);
 
-        $inquiry->load(['evidences', 'statusHistories' => function ($query) {
-            $query->orderBy('created_at', 'desc');
-        }]);
+        $inquiry->load([
+            'evidences',
+            'statusHistories' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            },
+        ]);
 
         return view('public.inquiries.show', compact('inquiry'));
     }

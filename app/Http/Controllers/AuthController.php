@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -51,7 +52,7 @@ class AuthController extends Controller
             return redirect()->route('password.change');
         }
 
-       return redirect($this->redirectTo($user));
+        return redirect($this->redirectTo($user));
     }
 
     public function showRegistrationForm()
@@ -109,7 +110,7 @@ class AuthController extends Controller
         return view('auth.forgot-password');
     }
 
-   public function sendResetLink(Request $request)
+    public function sendResetLink(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
@@ -123,7 +124,10 @@ class AuthController extends Controller
             ])->withInput();
         }
 
-        $token = Password::broker()->createToken($user);
+        /** @var PasswordBroker $broker */
+        $broker = Password::broker();
+
+        $token = $broker->createToken($user);
 
         return redirect()->route('password.link.sent', [
             'email' => $user->email,
@@ -146,7 +150,10 @@ class AuthController extends Controller
 
     public function showResetPasswordForm(Request $request, $token)
     {
-        return view('auth.reset-password', ['token' => $token, 'email' => $request->email]);
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => $request->email
+        ]);
     }
 
     public function resetPassword(Request $request)
@@ -174,6 +181,7 @@ class AuthController extends Controller
             'email' => __($status),
         ])->withInput();
     }
+
     public function logout(Request $request)
     {
         Auth::logout();
@@ -196,7 +204,12 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $user = auth()->user();
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login');
+        }
 
         if (!Hash::check($validated['current_password'], $user->password)) {
             throw ValidationException::withMessages([
@@ -209,20 +222,20 @@ class AuthController extends Controller
             'must_change_password' => false,
         ]);
 
-       return redirect($this->redirectTo($user))
-        ->with('success', 'Password changed successfully!');
+        return redirect($this->redirectTo($user))
+            ->with('success', 'Password changed successfully!');
     }
 
-    protected function redirectTo($user): string
-    {
-        if ($user->isMcmc()) {
-            return '/mcmc/dashboard';
-        }
-
-        if ($user->isAgency()) {
-            return '/agency/dashboard';
-        }
-
-        return '/dashboard';
+protected function redirectTo(User $user): string
+{
+    if ($user->isMcmc()) {
+        return '/mcmc/dashboard';
     }
+
+    if ($user->isAgency()) {
+        return '/agency/dashboard';
+    }
+
+    return '/dashboard';
+}
 }

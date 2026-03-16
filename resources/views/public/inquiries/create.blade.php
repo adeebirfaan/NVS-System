@@ -59,11 +59,12 @@
         color: #fca5a5;
     }
 
+    /* Inputs */
     .form-control,
     .form-select{
-        background: rgba(255,255,255,0.15);
-        border: 1px solid rgba(255,255,255,0.25);
-        color: #111827;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.22);
+        color: #ffffff !important;
         border-radius: 12px;
         padding: 12px 14px;
         transition: 0.3s;
@@ -71,14 +72,24 @@
 
     .form-control:focus,
     .form-select:focus{
-        background: rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.18);
         border: 1px solid #4facfe;
         box-shadow: 0 0 12px rgba(79,172,254,0.6);
-        color: #111827;
+        color: #ffffff !important;
     }
 
-    .form-control::placeholder{
-        color: rgba(17,24,39,0.45);
+    .form-control::placeholder,
+    textarea.form-control::placeholder{
+        color: rgba(255,255,255,0.55) !important;
+    }
+
+    .form-select{
+        color: #ffffff !important;
+    }
+
+    .form-select option{
+        color: #111827;
+        background: #ffffff;
     }
 
     textarea.form-control{
@@ -107,6 +118,61 @@
     .form-check-input:checked{
         background-color: #4facfe;
         border-color: #4facfe;
+    }
+
+    /* Modern file input */
+    .modern-file-input{
+        background: rgba(255,255,255,0.10) !important;
+        border: 1px solid rgba(255,255,255,0.22) !important;
+        color: rgba(255,255,255,0.78) !important;
+        border-radius: 14px;
+        padding: 10px 12px;
+        overflow: hidden;
+    }
+
+    .modern-file-input:focus{
+        background: rgba(255,255,255,0.16) !important;
+        border: 1px solid #4facfe !important;
+        box-shadow: 0 0 12px rgba(79,172,254,0.6) !important;
+        color: #ffffff !important;
+    }
+
+    .modern-file-input::file-selector-button{
+        background: linear-gradient(135deg,#4facfe,#00f2fe);
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        margin-right: 14px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.25s ease;
+    }
+
+    .modern-file-input::file-selector-button:hover{
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+    }
+
+    /* Optional nicer wrapper for file field */
+    .file-upload-shell{
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: 16px;
+        padding: 14px;
+    }
+
+    .file-upload-label{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #ffffff;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .file-upload-label i{
+        color: #8fd3ff;
     }
 
     .btn-modern{
@@ -237,20 +303,30 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="evidences" class="form-label">Supporting Evidence</label>
-                            <input
-                                type="file"
-                                class="form-control @error('evidences.*') is-invalid @enderror"
-                                id="evidences"
-                                name="evidences[]"
-                                multiple
-                                accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx"
-                            >
+                            <label class="form-label">Supporting Evidence</label>
+
+                            <div class="file-upload-shell">
+                                <div class="file-upload-label">
+                                    <i class="bi bi-cloud-arrow-up-fill"></i>
+                                    <span>Upload screenshots, photos, or documents</span>
+                                </div>
+
+                                <input
+                                    type="file"
+                                    class="form-control modern-file-input @error('evidences.*') is-invalid @enderror"
+                                    id="evidences"
+                                    name="evidences[]"
+                                    multiple
+                                    accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx"
+                                >
+                            </div>
+
                             @error('evidences.*')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
-                            <div class="form-text">
-                                Upload screenshots, photos, or documents. Max 10MB per file. Allowed types: jpg, png, gif, pdf, doc, docx.
+
+                            <div class="form-text mt-2">
+                                Max 10MB per file. Allowed types: jpg, png, gif, pdf, doc, docx.
                             </div>
                         </div>
 

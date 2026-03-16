@@ -58,23 +58,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-Route::prefix('mcmc')->middleware(['auth', 'mcmc'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'mcmcDashboard'])->name('mcmc.dashboard');
+Route::prefix('mcmc')->name('mcmc.')->middleware(['auth', 'mcmc'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'mcmcDashboard'])->name('dashboard');
     
     Route::prefix('inquiries')->group(function () {
-        Route::get('/', [McmcInquiryController::class, 'index'])->name('mcmc.inquiries.index');
-        Route::get('/{inquiry}', [McmcInquiryController::class, 'show'])->name('mcmc.inquiries.show');
-        Route::patch('/{inquiry}/status', [McmcInquiryController::class, 'updateStatus'])->name('mcmc.inquiries.update-status');
-        Route::post('/{inquiry}/assign', [McmcInquiryController::class, 'assign'])->name('mcmc.inquiries.assign');
-        Route::post('/{inquiry}/reassign', [McmcInquiryController::class, 'reassign'])->name('mcmc.inquiries.reassign');
-        Route::get('/statistics', [McmcInquiryController::class, 'statistics'])->name('mcmc.inquiries.statistics');
+        Route::get('/', [McmcInquiryController::class, 'index'])->name('inquiries.index');
+        Route::get('/statistics', [McmcInquiryController::class, 'statistics'])->name('inquiries.statistics');
+        Route::get('/{inquiry}', [McmcInquiryController::class, 'show'])->name('inquiries.show');
+        Route::patch('/{inquiry}/status', [McmcInquiryController::class, 'updateStatus'])->name('inquiries.update-status');
+        Route::post('/{inquiry}/assign', [McmcInquiryController::class, 'assign'])->name('inquiries.assign');
+        Route::post('/{inquiry}/reassign', [McmcInquiryController::class, 'reassign'])->name('inquiries.reassign');
     });
     
     Route::resource('/users', UserController::class);
     Route::resource('/agencies', AgencyController::class);
-    Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('mcmc.users.reset-password');
-    Route::get('/users-statistics', [UserController::class, 'statistics'])->name('mcmc.users.statistics');
-    Route::get('/users-report', [UserController::class, 'report'])->name('mcmc.users.report');
+
+    Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+    Route::get('/users-statistics', [UserController::class, 'statistics'])->name('users.statistics');
+    Route::get('/users-report', [UserController::class, 'report'])->name('users.report');
 });
 
 Route::prefix('agency')->middleware(['auth', 'agency'])->group(function () {

@@ -70,7 +70,7 @@ class Inquiry extends Model
 
     public function evidences(): HasMany
     {
-        return $this->hasMany(InquiryEvidence::class);
+        return $this->hasMany(InquiryEvidences::class);
     }
 
     public function statusHistories(): HasMany
